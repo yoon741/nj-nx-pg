@@ -29,6 +29,11 @@ data:
     INSERT INTO images (description, url) VALUES('zebra', 'images/zebra.png');
     ALTER ROLE dockeruser CONNECTION LIMIT -1;
 ---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: njnginx-config
+data:
   default.conf: |
     server {
       listen      80;
