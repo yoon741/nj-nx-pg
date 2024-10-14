@@ -21,3 +21,15 @@ spec:
     - port: 3000
       protocol: TCP
       targetPort: 3000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: argo-njnginx-svc
+spec:
+  selector:
+    app: argo-njnginx
+  ports:
+    - port: 80
+      protocol: TCP
+      targetPort: 80

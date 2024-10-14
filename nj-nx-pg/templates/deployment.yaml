@@ -65,3 +65,35 @@ spec:
           env:
             - name: DB_HOST
               value: argo-postgre-svc
+---
+# nginx
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: argo-njnginx-deploy
+  labels:
+    app: argo-njnginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: argo-njnginx
+  template:
+    metadata:
+      name: argo-njnginx
+      labels:
+        app: argo-njnginx
+    spec:
+      containers:
+        - name: argo-njnginx
+          image: nginx
+          ports:
+            - containerPort: 80
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /etc/nginx/conf.d
+              name: argo-config
+      volumes:
+        - name: nginx-config
+          configMap:
+            name: njnginx-config
