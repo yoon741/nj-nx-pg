@@ -1,3 +1,4 @@
+# postgre
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -35,4 +36,32 @@ spec:
         - name: initdb-script
           configMap:
             name: pets-initdb-config
-
+---
+# nodejs
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: argo-nodejs-deploy
+  labels:
+    app: argo-nodejs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: argo-nodejs
+  template:
+    metadata:
+      name: argo-nodejs
+      labels:
+        app: argo-nodejs
+    spec:
+      containers:
+        - name: argo-nodejs
+          image: yoon741/k8s-nodejs:v2  # 이미 올린 내역이 있으니 그대로
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3000
+              protocol: TCP
+          env:
+            - name: DB_HOST
+              value: argo-postgre-svc
