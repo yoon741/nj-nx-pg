@@ -1,0 +1,99 @@
+# postgre
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: argo-postgre13-deploy
+  labels:
+    app: argo-postgre13
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: argo-postgre13
+  template:
+    metadata:
+      name: argo-postgre13
+      labels:
+        app: argo-postgre13
+    spec:
+      containers:
+        - name: argo-postgre13
+          image: postgres:13-alpine3.20
+          ports:
+            - containerPort: 5432
+              protocol: TCP
+          envFrom:
+            - secretRef:
+                name:  postgre-pets-secret
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: postgre-storage
+            - mountPath: /docker-entrypoint-initdb.d
+              name: initdb-script
+      volumes:
+        - name: postgre-storage
+          emptyDir: {}      # 내부저장소
+        - name: initdb-script
+          configMap:
+            name: pets-initdb-config
+---
+# nodejs
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: argo-nodejs-deploy
+  labels:
+    app: argo-nodejs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: argo-nodejs
+  template:
+    metadata:
+      name: argo-nodejs
+      labels:
+        app: argo-nodejs
+    spec:
+      containers:
+        - name: argo-nodejs
+          image: yoon741/k8s-nodejs:v2  # 이미 올린 내역이 있으니 그대로
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3000
+              protocol: TCP
+          env:
+            - name: DB_HOST
+              value: argo-postgre-svc
+---
+# nginx
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: argo-njnginx-deploy
+  labels:
+    app: argo-njnginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: argo-njnginx
+  template:
+    metadata:
+      name: argo-njnginx
+      labels:
+        app: argo-njnginx
+    spec:
+      containers:
+        - name: argo-njnginx
+          image: nginx
+          ports:
+            - containerPort: 80
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /etc/nginx/conf.d
+              name: nginx-config
+      volumes:
+        - name: nginx-config
+          configMap:
+            name: njnginx-config
